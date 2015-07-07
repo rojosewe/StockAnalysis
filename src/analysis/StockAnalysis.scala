@@ -4,33 +4,6 @@ import utils.CSV
 import apiCall.YahooFinance
 import apiCall.GoogleTrendsApi
 
-object StockAnalysisTest {
-	
-	def main(args: Array[String]): Unit = {
-			val stocks = Array[String]("TSLA", "AAPL", "TWTR", "NFLX", "IBM", "AMZN", "LNKD", "DDD", "HPQ", "QLIK", "FB")
-					val monthsAgo = 6
-					val sa: StockAnalysis = new StockAnalysis()
-					for (stock <- stocks) {
-						val data = new CSV().stringToData(YahooFinance.csvHistory(stock, monthsAgo), true)
-								val trendData = new CSV().stringToData(GoogleTrendsApi.csvHistory(stock, monthsAgo), true)
-								
-								println(data(0)(0))
-								println(trendData(0)(0))
-								
-								val mean = sa.deltaMean(data)
-								println("% Rise: " + sa.percenturalRise(data))
-								println("Rise: " + sa.rise(data))
-								println("Min: " + sa.min(data))
-								println("Max: " + sa.max(data))
-								println(s"$monthsAgo months Ago : " + sa.monthsAgo(data))
-								println("StdDev: " + sa.deltaStdDev(data, mean))
-								println("Today: " + sa.today(data))
-								println("Mean: " + mean)
-								println("--------------------------------------------------------------------------")
-					}
-	}
-}
-
 /**
  * @author Rodrigo Weffer
  */
@@ -74,3 +47,32 @@ class StockAnalysis {
     data.foldLeft(Double.MaxValue) { (min, row) => if (min < row(CLOSING_INDEX)) min else row(CLOSING_INDEX) }
   }
 }
+
+object StockAnalysisTest {
+	
+	def main(args: Array[String]): Unit = {
+			val stocks = Array[String]("TSLA", "AAPL", "TWTR", "NFLX", "IBM", "AMZN", "LNKD", "DDD", "HPQ", "QLIK", "FB")
+					val monthsAgo = 6
+					val sa: StockAnalysis = new StockAnalysis()
+					for (stock <- stocks) {
+						val data = new CSV().stringToData(YahooFinance.csvHistory(stock, monthsAgo), true)
+								val trendData = new CSV().stringToData(GoogleTrendsApi.csvHistory(stock, monthsAgo), true)
+								
+								println(data(0)(0))
+								println(trendData(0)(0))
+								
+								val mean = sa.deltaMean(data)
+								println("% Rise: " + sa.percenturalRise(data))
+								println("Rise: " + sa.rise(data))
+								println("Min: " + sa.min(data))
+								println("Max: " + sa.max(data))
+								println(s"$monthsAgo months Ago : " + sa.monthsAgo(data))
+								println("StdDev: " + sa.deltaStdDev(data, mean))
+								println("Today: " + sa.today(data))
+								println("Mean: " + mean)
+								println("--------------------------------------------------------------------------")
+					}
+	}
+}
+
+
