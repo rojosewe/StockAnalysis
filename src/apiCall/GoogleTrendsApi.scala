@@ -1,29 +1,32 @@
 package apiCall
 
-
 import utils.Http
 import java.text.SimpleDateFormat
 
 object GoogleTrendsApi {
 
   def csvHistory(symbol: String, months: Int): String = {
-	  extractValues(jsonHistory(symbol, months))
-    
+    extractValues(jsonHistory(symbol, months))
+
   }
-  
-  def extractValues(json:String) : String = {
-    val value : StringBuilder = new StringBuilder()
+
+  def extractValues(json: String): String = {
+    val value: StringBuilder = new StringBuilder()
     val fPattern = """"f":".+?}""".r
-    val df = new SimpleDateFormat("EEEEE, MMMMM dd, yyyy") 
+    val df = new SimpleDateFormat("EEEEE, MMMMM dd, yyyy")
     var isDate = true
-    for(m <- fPattern.findAllIn(json)){
-      if(isDate)
-        value.append(df.parse(m.replace(""""f":"""", "").replace(""""}""", "")).getTime()).append(",")
-      else
-        value.append(m.replace(""""f":"""", "").replace(""""}""", "")).append("\n")
-      isDate = !isDate
-    } 
-    value.toString()
+    try {
+      for (m <- fPattern.findAllIn(json)) {
+        if (isDate)
+          value.append(df.parse(m.replace(""""f":"""", "").replace(""""}""", "")).getTime()).append(",")
+        else
+          value.append(Integer.valueOf(m.replace(""""f":"""", "").replace(""""}""", ""))).append("\n")
+        isDate = !isDate
+      }
+    } catch {
+      case t: Throwable => if (!isDate) value.setLength(value.length - 14)
+    }
+    return value.toString()
   }
 
   def jsonHistory(symbol: String, months: Int): String = {

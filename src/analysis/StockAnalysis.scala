@@ -1,13 +1,9 @@
-
-
-import utils.CSV
-import apiCall.YahooFinance
-import apiCall.GoogleTrendsApi
+package analysis
 
 /**
  * @author Rodrigo Weffer
  */
-class StockAnalysis {
+class StockAnalysis(data: Array[Array[Double]]) {
 
   val OPENING_INDEX = 1
   val HIGH_INDEX = 2
@@ -15,64 +11,72 @@ class StockAnalysis {
   val CLOSING_INDEX = 4
   val VOLUME_INDEX = 5
 
-  def rise(data: Array[Array[Double]]): Double = {
-    data(0)(CLOSING_INDEX) - data(data.length - 1)(CLOSING_INDEX)
+  val last = data.length - 1
+  val size = data.length
+
+  def rise(): Double = {
+    data(0)(CLOSING_INDEX) - data(last)(CLOSING_INDEX)
   }
 
-  def percenturalRise(data: Array[Array[Double]]): Double = {
-    (data(0)(CLOSING_INDEX) * 100 / data(data.length - 1)(CLOSING_INDEX)) - 100
+  def percenturalRise(): Double = {
+    (data(0)(CLOSING_INDEX) * 100 / data(last)(CLOSING_INDEX)) - 100
   }
 
-  def deltaMean(data: Array[Array[Double]]): Double = {
-    data.foldLeft(0.0) { (sum, x) => sum + Math.abs(x(CLOSING_INDEX) - x(OPENING_INDEX)) } / data.length
+  def deltaMean(): Double = {
+    data.foldLeft(0.0) { (sum, x) => sum + Math.abs(x(CLOSING_INDEX) - x(OPENING_INDEX)) } / size
   }
 
-  def deltaStdDev(data: Array[Array[Double]]): Double = {
-    val mean = deltaMean(data)
-    data.foldLeft(0.0) { (sum, x) => sum + Math.pow(x(CLOSING_INDEX) - x(OPENING_INDEX) - mean, 2) } / data.length
+  def deltaStdDev(): Double = {
+    val mean = deltaMean()
+    data.foldLeft(0.0) { (sum, x) => sum + Math.pow(x(CLOSING_INDEX) - x(OPENING_INDEX) - mean, 2) } / size
+  }
+  
+  def deltaStdDev(mean: Double): Double = {
+		  data.foldLeft(0.0) { (sum, x) => sum + Math.pow(x(CLOSING_INDEX) - x(OPENING_INDEX) - mean, 2) } / size
   }
 
-  def deltaStdDev(data: Array[Array[Double]], mean: Double): Double = {
-    data.foldLeft(0.0) { (sum, x) => sum + Math.pow(x(CLOSING_INDEX) - x(OPENING_INDEX) - mean, 2) } / data.length
+  def mean(): Double = {
+    data.foldLeft(0.0) { (sum, x) => sum + Math.abs(x(CLOSING_INDEX)) } / size
   }
 
-  def today(data: Array[Array[Double]]) = { data(0)(CLOSING_INDEX) }
-  def monthsAgo(data: Array[Array[Double]]) = { data(data.length - 1)(CLOSING_INDEX) }
+  def stdDev(): Double = {
+    val mean = deltaMean()
+    data.foldLeft(0.0) { (sum, x) => sum + Math.pow(x(CLOSING_INDEX) - mean, 2) } / size
+  }
 
-  def max(data: Array[Array[Double]]): Double = {
+  def stdDev(mean: Double): Double = {
+		  data.foldLeft(0.0) { (sum, x) => sum + Math.pow(x(CLOSING_INDEX) - mean, 2) } / size
+  }
+  
+
+  def today() = { data(0)(CLOSING_INDEX) }
+
+  def monthsAgo() = { data(last)(CLOSING_INDEX) }
+
+  def max(): Double = {
     data.foldLeft(0.0) { (max, row) => if (max > row(CLOSING_INDEX)) max else row(CLOSING_INDEX) }
   }
 
-  def min(data: Array[Array[Double]]): Double = {
+  def min(): Double = {
     data.foldLeft(Double.MaxValue) { (min, row) => if (min < row(CLOSING_INDEX)) min else row(CLOSING_INDEX) }
   }
-}
-
-object StockAnalysisTest {
-	
-	def main(args: Array[String]): Unit = {
-			val stocks = Array[String]("TSLA", "AAPL", "TWTR", "NFLX", "IBM", "AMZN", "LNKD", "DDD", "HPQ", "QLIK", "FB")
-					val monthsAgo = 6
-					val sa: StockAnalysis = new StockAnalysis()
-					for (stock <- stocks) {
-						val data = new CSV().stringToData(YahooFinance.csvHistory(stock, monthsAgo), true)
-								val trendData = new CSV().stringToData(GoogleTrendsApi.csvHistory(stock, monthsAgo), true)
-								
-								println(data(0)(0))
-								println(trendData(0)(0))
-								
-								val mean = sa.deltaMean(data)
-								println("% Rise: " + sa.percenturalRise(data))
-								println("Rise: " + sa.rise(data))
-								println("Min: " + sa.min(data))
-								println("Max: " + sa.max(data))
-								println(s"$monthsAgo months Ago : " + sa.monthsAgo(data))
-								println("StdDev: " + sa.deltaStdDev(data, mean))
-								println("Today: " + sa.today(data))
-								println("Mean: " + mean)
-								println("--------------------------------------------------------------------------")
-					}
-	}
+  
+  def print() = {
+    val m:Double = mean()
+    val dm:Double = deltaMean()
+    println(new StringBuilder()
+    .append("Stock % Rise: " + percenturalRise() + "'\n")
+    .append("Stock Rise: " + rise() + "'\n")
+    .append("Stock Min: " + min() + "'\n")
+    .append("Stock Max: " + max() + "'\n")
+    .append(s"Stock months Ago : " + monthsAgo() + "'\n")
+    .append("Stock Today: " + today() + "'\n")
+    .append("Stock DeltaMean: " + dm + "'\n")
+    .append("Stock DeltaStdDev: " + deltaStdDev(dm) + "'\n")
+    .append("Stock Mean: " + m + "'\n")
+    .append("Stock StdDev: " + stdDev(m) + "'\n")
+    .toString())
+  }
 }
 
 
