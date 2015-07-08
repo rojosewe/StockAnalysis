@@ -2,6 +2,8 @@ package apiCall
 
 import utils.Http
 import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Arrays
 
 object GoogleTrendsApi {
 
@@ -12,15 +14,19 @@ object GoogleTrendsApi {
 
   def extractValues(json: String): String = {
     val value: StringBuilder = new StringBuilder()
-    val fPattern = """"f":".+?}""".r
-    val df = new SimpleDateFormat("EEEEE, MMMMM dd, yyyy")
+    val fPattern = """"v":.+?,"""".r
     var isDate = true
     try {
       for (m <- fPattern.findAllIn(json)) {
-        if (isDate)
-          value.append(df.parse(m.replace(""""f":"""", "").replace(""""}""", "")).getTime()).append(",")
-        else
-          value.append(Integer.valueOf(m.replace(""""f":"""", "").replace(""""}""", ""))).append("\n")
+        if (isDate) {
+          val values = m.replace(""""v":new Date(""", "").replace("""),"""", "").split(",")
+          val cal = Calendar.getInstance()
+          cal.set(Integer.valueOf(values(0)), Integer.valueOf(values(1)), Integer.valueOf(values(2)))
+          value.append(cal.getTime.getTime).append(",")
+        } else {
+          println(m.replace(""""v":""", "").replace(""","""", ""))
+          value.append(m.replace(""""v":""", "").replace(""","""", "").toDouble).append("\n")
+        }
         isDate = !isDate
       }
     } catch {

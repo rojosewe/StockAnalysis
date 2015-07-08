@@ -2,6 +2,7 @@ package utils
 
 import apiCall.YahooFinance
 import java.text.SimpleDateFormat
+import java.util.Arrays
 
 /**
  * @author sensefields
@@ -11,6 +12,12 @@ class CSV {
   def stringToData(strData: String, header: Boolean): Array[Array[Double]] = {
     processRows(strData.split("\n"), header)
   }
+  
+  /*def stringToFile(strData: String, header: Boolean): Array[Array[Double]] = {
+    processRows(strData.split("\n"), header).foreach { r => 
+      println(r)
+    }
+  }*/
 
   def processRows(rows: Array[String], header: Boolean): Array[Array[Double]] = {
     if (header) read(rows.tail)
