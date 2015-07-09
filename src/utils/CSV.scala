@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.nio.file.Files
 import java.nio.charset.StandardCharsets
+import apiCall.GoogleTrendsApi
 
 /**
  * @author sensefields
@@ -42,14 +43,16 @@ class CSV {
       rows = rowsOrig.reverse
     else
       rows = rowsOrig
-    val df = new SimpleDateFormat("yyyy-mm-dd")
+    val df = new SimpleDateFormat("yyyy-MM-dd")
     val data = Array.ofDim[Double](rows.length, rows(0).split(",").length)
     for ((line, i) <- rows.zipWithIndex) {
       val cols = line.split(",")
       for (j <- 0 to (cols.length - 1)) {
         if (cols(j).startsWith("Date:")) {
-          println(cols(j).trim().replace("Date:", ""))
-          data(i)(j) = df.parse(cols(j).trim().replace("Date:", "")).getTime()
+//          println(cols(j).trim().replace("Date:", ""), "->", df.parse(cols(j).trim().replace("Date:", "")), "->", df.parse(cols(j).trim().replace("Date:", "")).getTime())
+          data(i)(j) = df.parse(cols(j).trim().replace("Date:", "")).getTime()/1000
+        }else if (cols(j).isEmpty()) {
+          data(i)(j) = 0.0
         } else {
           data(i)(j) = cols(j).trim().toDouble
         }
@@ -62,8 +65,8 @@ class CSV {
 object CSVTest {
 
   def main(args: Array[String]): Unit = {
-    println(YahooFinance.csvHistory("TSLA", 4).substring(0, 300))
-    val csv = new CSV().stringToData(YahooFinance.csvHistory("TSLA", 4), true)
+//    println(GoogleTrendsApi.csvHistory("TSLA", 4).substring(0, 300))
+    val csv = new CSV().stringToData(GoogleTrendsApi.csvHistory("TSLA", 4), true)
     csv.foreach { x => x.foreach { y => print(y + ",") }; println() }
   }
 

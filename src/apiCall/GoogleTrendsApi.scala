@@ -20,7 +20,7 @@ object GoogleTrendsApi {
         if (isDate) {
           val values = m.replace(""""v":new Date(""", "").replace("""),"""", "").split(",")
           val cal = Calendar.getInstance()
-          value.append("Date:").append(Integer.valueOf(values(0))).append("-").append(Integer.valueOf(values(1))).append("-").append(Integer.valueOf(values(2))).append(",")
+          value.append("Date:").append(Integer.valueOf(values(0))).append("-").append(Integer.valueOf(values(1)) + 1).append("-").append(Integer.valueOf(values(2))).append(",")
         } else {
           value.append(m.replace(""""v":""", "").replace(""","""", "").toDouble).append("\n")
         }

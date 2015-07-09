@@ -1,6 +1,7 @@
 package analysis
 
 import scala.collection.mutable.WrappedArray
+import scala.annotation.tailrec
 import scala.util.control.Breaks.break
 import scala.collection.mutable.WrappedArrayBuilder
 import apiCall.GoogleTrendsApi
@@ -24,15 +25,17 @@ class TrendsAnalysis(data: Array[Array[Double]]) {
   
   def mean(): Double = deltaMean(0, (data: WrappedArray[Array[Double]]))
 
-  def mean(sum: Double, data: Seq[Array[Double]]): Double = 
+  @tailrec
+  final def mean(sum: Double, data: Seq[Array[Double]]): Double = 
     data.tail match {
       case Nil => return (data.head(1) + sum) / data.length
-      case _ => deltaMean(sum + data.head(1), data.tail)
+      case _ => mean(sum + data.head(1), data.tail)
     }
   
   def deltaMean(): Double = deltaMean(0, (data: WrappedArray[Array[Double]]))
 
-  def deltaMean(sum: Double, data: Seq[Array[Double]]): Double = 
+  @tailrec
+  final def deltaMean(sum: Double, data: Seq[Array[Double]]): Double = 
     data.tail match {
       case Nil => return sum / data.length
       case _ => deltaMean(sum + data.tail.head(1) - data.head(1), data.tail)
@@ -40,7 +43,8 @@ class TrendsAnalysis(data: Array[Array[Double]]) {
   
   def stdDev(mean:Double): Double = stdDev(0, (data: WrappedArray[Array[Double]]), mean)
 
-  def stdDev(sum: Double, data: Seq[Array[Double]], mean :Double): Double = {
+  @tailrec
+  final def stdDev(sum: Double, data: Seq[Array[Double]], mean :Double): Double = {
     data.tail match {
       case Nil => return (data.head(1) + sum) / data.length
       case _ => stdDev(sum + Math.pow(data.head(1) - mean, 2), data.tail, mean) 
@@ -49,7 +53,8 @@ class TrendsAnalysis(data: Array[Array[Double]]) {
   
   def deltaStdDev(mean:Double): Double = deltaStdDev(0, (data: WrappedArray[Array[Double]]), mean:Double)
 
-  def deltaStdDev(sum: Double, data: Seq[Array[Double]], mean :Double): Double = 
+  @tailrec
+  final def deltaStdDev(sum: Double, data: Seq[Array[Double]], mean :Double): Double = 
     data.tail match {
       case Nil => return sum / data.length
       case _ => deltaStdDev(sum + Math.pow(data.tail.head(1) - data.head(1) - mean, 2), data.tail, mean)
