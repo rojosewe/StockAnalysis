@@ -9,7 +9,6 @@ object GoogleTrendsApi {
 
   def csvHistory(symbol: String, months: Int): String = {
     extractValues(jsonHistory(symbol, months))
-
   }
 
   def extractValues(json: String): String = {
@@ -21,10 +20,8 @@ object GoogleTrendsApi {
         if (isDate) {
           val values = m.replace(""""v":new Date(""", "").replace("""),"""", "").split(",")
           val cal = Calendar.getInstance()
-          cal.set(Integer.valueOf(values(0)), Integer.valueOf(values(1)), Integer.valueOf(values(2)))
-          value.append(cal.getTime.getTime).append(",")
+          value.append("Date:").append(Integer.valueOf(values(0))).append("-").append(Integer.valueOf(values(1))).append("-").append(Integer.valueOf(values(2))).append(",")
         } else {
-          println(m.replace(""""v":""", "").replace(""","""", ""))
           value.append(m.replace(""""v":""", "").replace(""","""", "").toDouble).append("\n")
         }
         isDate = !isDate
